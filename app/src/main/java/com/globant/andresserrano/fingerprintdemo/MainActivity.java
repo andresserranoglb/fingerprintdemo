@@ -32,7 +32,6 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -66,7 +65,6 @@ public class MainActivity extends Activity {
 
     private KeyStore mKeyStore;
     private KeyGenerator mKeyGenerator;
-    private SharedPreferences mSharedPreferences;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -97,25 +95,17 @@ public class MainActivity extends Activity {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException( "Failed to get an instance of Cipher", e );
         }
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences( this );
 
         KeyguardManager keyguardManager = getSystemService( KeyguardManager.class );
         FingerprintManager fingerprintManager = getSystemService( FingerprintManager.class );
         Button purchaseButton = (Button) findViewById( R.id.purchase_button );
-        Button purchaseButtonNotInvalidated = (Button) findViewById(
-                R.id.purchase_button_not_invalidated );
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            purchaseButtonNotInvalidated.setEnabled( true );
-            purchaseButtonNotInvalidated.setOnClickListener(
+            purchaseButton.setEnabled( true );
+            purchaseButton.setOnClickListener(
                     new PurchaseButtonClickListener( cipherNotInvalidated,
                             KEY_NAME_NOT_INVALIDATED ) );
-        } else {
-            // Hide the purchase button which uses a non-invalidated key
-            // if the app doesn't work on Android N preview
-            purchaseButtonNotInvalidated.setVisibility( View.GONE );
-            findViewById( R.id.purchase_button_not_invalidated_description )
-                    .setVisibility( View.GONE );
         }
 
         if (!keyguardManager.isKeyguardSecure()) {
@@ -125,7 +115,6 @@ public class MainActivity extends Activity {
                             + "Go to 'Settings -> Security -> Fingerprint' to set up a fingerprint",
                     Toast.LENGTH_LONG ).show();
             purchaseButton.setEnabled( false );
-            purchaseButtonNotInvalidated.setEnabled( false );
             return;
         }
 
@@ -195,9 +184,9 @@ public class MainActivity extends Activity {
     // Show confirmation, if fingerprint was used show crypto information.
     private void showConfirmation(byte[] encrypted) {
         if (encrypted != null) {
-            TextView v = (TextView) findViewById( R.id.encrypted_message );
-            v.setVisibility( View.VISIBLE );
-            v.setText( Base64.encodeToString( encrypted, 0 /* flags */ ) );
+            Toast.makeText( this,
+                    Base64.encodeToString( encrypted, 0 /* flags */ ),
+                    Toast.LENGTH_LONG ).show();
         }
     }
 
@@ -264,7 +253,6 @@ public class MainActivity extends Activity {
         @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onClick(View view) {
-            findViewById( R.id.encrypted_message ).setVisibility( View.GONE );
             // Set up the crypto object for later. The object will be authenticated by use
             // of the fingerprint.
             if (initCipher( mCipher, mKeyName )) {
@@ -273,13 +261,10 @@ public class MainActivity extends Activity {
                 FingerprintAuthenticationDialogFragment fragment
                         = new FingerprintAuthenticationDialogFragment();
                 fragment.setCryptoObject( new FingerprintManager.CryptoObject( mCipher ) );
-                boolean useFingerprintPreference = mSharedPreferences
-                        .getBoolean( getString( R.string.use_fingerprint_to_authenticate_key ),
-                                true );
-                if (useFingerprintPreference) {
-                    fragment.setStage(
-                            FingerprintAuthenticationDialogFragment.Stage.FINGERPRINT );
-                }
+
+                fragment.setStage(
+                        FingerprintAuthenticationDialogFragment.Stage.FINGERPRINT );
+
                 fragment.show( getFragmentManager(), DIALOG_FRAGMENT_TAG );
             }
         }
