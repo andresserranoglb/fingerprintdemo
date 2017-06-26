@@ -127,8 +127,6 @@ public class FingerprintAuthenticationDialogFragment extends DialogFragment
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onAuthenticated() {
-        // Callback from FingerprintUiHelper. Let the activity know that authentication was
-        // successful.
         mainActivity.onAuthenticatedWhitFingerPrint( true /* withFingerprint */, cryptoObject );
         dismiss();
     }
@@ -139,10 +137,4 @@ public class FingerprintAuthenticationDialogFragment extends DialogFragment
         goToBackup();
     }
 
-    /**
-     * Enumeration to indicate which authentication method the user is trying to authenticate with.
-     */
-    public enum Stage {
-        FINGERPRINT
-    }
 }
