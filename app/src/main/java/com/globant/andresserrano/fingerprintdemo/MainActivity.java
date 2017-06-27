@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -32,19 +31,15 @@ import android.widget.Toast;
 import com.globant.andresserrano.fingerprintdemo.security.CipherFingerptint;
 import com.globant.andresserrano.fingerprintdemo.security.KeyFingerprint;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 
 /**
  * Main entry point for the sample, showing a backpack and "Purchase" button.
  */
 public class MainActivity extends Activity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String DIALOG_FRAGMENT_TAG = "FingerprintAuthenticationDialogFragment";
-    private static final String SECRET_MESSAGE = "Very secret message";
     static final String DEFAULT_KEY_NAME = "default_key";
 
 
@@ -87,7 +82,7 @@ public class MainActivity extends Activity {
             }
             keyFingerprint.createKey( DEFAULT_KEY_NAME );
             purchaseButton.setEnabled( true );
-            final Cipher cipher =CipherFingerptint.getDefaultCipher();
+            final Cipher cipher = CipherFingerptint.getDefaultCipher();
             purchaseButton.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -96,14 +91,13 @@ public class MainActivity extends Activity {
                         // crypto, or you can fall back to using a server-side verified password.
                         FingerprintAuthenticationDialogFragment fragment
                                 = new FingerprintAuthenticationDialogFragment();
-                        fragment.setCryptoObject( new FingerprintManager.CryptoObject( cipher) );
+                        fragment.setCryptoObject( new FingerprintManager.CryptoObject( cipher ) );
 
                         fragment.show( getFragmentManager(), DIALOG_FRAGMENT_TAG );
                     }
                 }
             } );
-        }
-        else{
+        } else {
             purchaseButton.setEnabled( false );
         }
 
@@ -123,7 +117,8 @@ public class MainActivity extends Activity {
             // If the user has authenticated with fingerprint, verify that using cryptography and
             // then show the confirmation message.
             assert cryptoObject != null;
-            tryEncrypt( cryptoObject.getCipher() );
+            byte[] encrypted = CipherFingerptint.tryEncrypt( cryptoObject.getCipher() );
+            showConfirmation( encrypted );
         } else {
             // Authentication happened with backup password. Just show the confirmation message.
             showConfirmation( null );
@@ -136,21 +131,11 @@ public class MainActivity extends Activity {
             Toast.makeText( this,
                     Base64.encodeToString( encrypted, 0 /* flags */ ),
                     Toast.LENGTH_LONG ).show();
+        } else {
+            Toast.makeText( this, "Failed to encrypt the data with the generated key. "
+                    + "Retry the purchase", Toast.LENGTH_LONG ).show();
         }
     }
 
-    /**
-     * Tries to encrypt some data with the generated key in  which is
-     * only works if the user has just authenticated via fingerprint.
-     */
-    private void tryEncrypt(Cipher cipher) {
-        try {
-            byte[] encrypted = cipher.doFinal( SECRET_MESSAGE.getBytes() );
-            showConfirmation( encrypted );
-        } catch (BadPaddingException | IllegalBlockSizeException e) {
-            Toast.makeText( this, "Failed to encrypt the data with the generated key. "
-                    + "Retry the purchase", Toast.LENGTH_LONG ).show();
-            Log.e( TAG, "Failed to encrypt the data with the generated key." + e.getMessage() );
-        }
-    }
+
 }
