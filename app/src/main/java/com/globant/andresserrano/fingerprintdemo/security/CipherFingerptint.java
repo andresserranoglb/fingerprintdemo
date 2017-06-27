@@ -112,15 +112,4 @@ public class CipherFingerptint {
         return defaultCipher;
     }
 
-    public Cipher getCipherNotInvalidated() {
-        Cipher cipherNotInvalidated;
-        try {
-            cipherNotInvalidated = Cipher.getInstance( KeyProperties.KEY_ALGORITHM_AES + "/"
-                    + KeyProperties.BLOCK_MODE_CBC + "/"
-                    + KeyProperties.ENCRYPTION_PADDING_PKCS7 );
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException( "Failed to get an instance of Cipher", e );
-        }
-        return cipherNotInvalidated;
-    }
 }
