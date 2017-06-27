@@ -37,7 +37,7 @@ public class KeyFingerprint {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void createKey(String keyName, boolean invalidatedByBiometricEnrollment) {
+    public void createKey(String keyName) {
         try {
             keyStore.load( null );
             KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder( keyName,
@@ -46,10 +46,6 @@ public class KeyFingerprint {
                     .setBlockModes( KeyProperties.BLOCK_MODE_CBC )
                     .setUserAuthenticationRequired( true )
                     .setEncryptionPaddings( KeyProperties.ENCRYPTION_PADDING_PKCS7 );
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                builder.setInvalidatedByBiometricEnrollment( invalidatedByBiometricEnrollment );
-            }
             keyGenerator.init( builder.build() );
             keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException

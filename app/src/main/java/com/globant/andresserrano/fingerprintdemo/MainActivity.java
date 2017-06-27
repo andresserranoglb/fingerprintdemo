@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.globant.andresserrano.fingerprintdemo.security.CipherFingerptint;
+import com.globant.andresserrano.fingerprintdemo.security.KeyFingerprint;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -47,15 +48,14 @@ public class MainActivity extends Activity {
     static final String DEFAULT_KEY_NAME = "default_key";
 
 
-    CipherFingerptint cipherFingerptint;
+    KeyFingerprint keyFingerprint;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
-
-        cipherFingerptint = new CipherFingerptint();
+        keyFingerprint = new KeyFingerprint();
 
         KeyguardManager keyguardManager = getSystemService( KeyguardManager.class );
         FingerprintManager fingerprintManager = getSystemService( FingerprintManager.class );
@@ -85,13 +85,13 @@ public class MainActivity extends Activity {
                         Toast.LENGTH_LONG ).show();
                 return;
             }
-            cipherFingerptint.createKey( DEFAULT_KEY_NAME, true );
+            keyFingerprint.createKey( DEFAULT_KEY_NAME );
             purchaseButton.setEnabled( true );
-            final Cipher cipher =cipherFingerptint.getDefaultCipher();
+            final Cipher cipher =CipherFingerptint.getDefaultCipher();
             purchaseButton.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (cipherFingerptint.initCipher( cipher, DEFAULT_KEY_NAME )) {
+                    if (CipherFingerptint.initCipher( keyFingerprint.getKeyStore(), cipher, DEFAULT_KEY_NAME )) {
                         // Show the fingerprint dialog. The user has the option to use the fingerprint with
                         // crypto, or you can fall back to using a server-side verified password.
                         FingerprintAuthenticationDialogFragment fragment
