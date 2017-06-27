@@ -25,7 +25,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-public class CipherFingerptint {
+public class CipherFingerprint {
 
 
     private static final String TAG = MainActivity.class.getSimpleName();

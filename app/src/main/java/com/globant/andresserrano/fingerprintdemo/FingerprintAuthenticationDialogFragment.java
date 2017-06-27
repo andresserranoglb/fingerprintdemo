@@ -37,11 +37,10 @@ public class FingerprintAuthenticationDialogFragment extends DialogFragment
         implements FingerprintUiHelper.Callback {
 
     private Button buttonCancel;
-    private View fingerprintContent;
 
     private FingerprintManager.CryptoObject cryptoObject;
     private FingerprintUiHelper fingerprintUiHelper;
-    private MainActivity mainActivity;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +54,7 @@ public class FingerprintAuthenticationDialogFragment extends DialogFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         getDialog().setTitle( getString( R.string.sign_in ) );
-        View v = inflater.inflate( R.layout.fingerprint_dialog_container, container, false );
+        View v = inflater.inflate( R.layout.fragment_dialog_fingerprint, container, false );
         buttonCancel = (Button) v.findViewById( R.id.button_cancel );
         buttonCancel.setOnClickListener( new View.OnClickListener() {
             @Override
@@ -65,16 +64,11 @@ public class FingerprintAuthenticationDialogFragment extends DialogFragment
         } );
 
 
-        fingerprintContent = v.findViewById( R.id.fingerprint_container );
         fingerprintUiHelper = new FingerprintUiHelper(
-                mainActivity.getSystemService( FingerprintManager.class ),
+                getActivity().getSystemService( FingerprintManager.class ),
                 (ImageView) v.findViewById( R.id.fingerprint_icon ),
                 (TextView) v.findViewById( R.id.fingerprint_status ), this );
-        updateStage();
 
-        if (!fingerprintUiHelper.isFingerprintAuthAvailable()) {
-            goToBackup();
-        }
         return v;
     }
 
@@ -96,7 +90,6 @@ public class FingerprintAuthenticationDialogFragment extends DialogFragment
     @Override
     public void onAttach(Context context) {
         super.onAttach( context );
-        mainActivity = (MainActivity) getActivity();
     }
 
     /**
@@ -113,21 +106,14 @@ public class FingerprintAuthenticationDialogFragment extends DialogFragment
      */
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void goToBackup() {
-        updateStage();
         // Fingerprint is not used anymore. Stop listening for it.
         fingerprintUiHelper.stopListening();
-    }
-
-    private void updateStage() {
-        buttonCancel.setText( R.string.cancel );
-        fingerprintContent.setVisibility( View.VISIBLE );
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onAuthenticated() {
-        mainActivity.onAuthenticatedWhitFingerPrint( true /* withFingerprint */, cryptoObject );
+        //mainActivity.onAuthenticatedWhitFingerPrint( true /* withFingerprint */, cryptoObject );
         dismiss();
     }
 
